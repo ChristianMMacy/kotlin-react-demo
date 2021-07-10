@@ -1,29 +1,8 @@
 import kotlinx.css.*
-import react.RBuilder
-import react.RComponent
-import react.RProps
-import react.RState
+import react.*
 import react.dom.*
 import styled.css
 import styled.styledDiv
-
-external interface WelcomeProps : RProps {
-    var name: String
-}
-
-external interface Video {
-    val id: Int
-    val title: String
-    val speaker: String
-    val videoUrl: String
-}
-
-data class KotlinVideo(
-    override val id: Int,
-    override val title: String,
-    override val speaker: String,
-    override val videoUrl: String
-) : Video
 
 val unwatchedVideos = listOf(
     KotlinVideo(1, "Building and breaking things", "John Doe", "https://youtu.be/PsaFVLr8t4E"),
@@ -35,16 +14,8 @@ val watchedVideos = listOf(
     KotlinVideo(4, "Mouseless development", "Tom Jerry", "https://youtu.be/PsaFVLr8t4E")
 )
 
-
-data class WelcomeState(val name: String) : RState
-
 @ExperimentalJsExport
-@JsExport
-class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(props) {
-
-    init {
-        state = WelcomeState(props.name)
-    }
+class App : RComponent<RProps, RState>() {
 
     override fun RBuilder.render() {
         h1 {
@@ -54,18 +25,14 @@ class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(prop
             h3 {
                 +"Videos to watch"
             }
-            for (video in unwatchedVideos) {
-                p {
-                    +"${video.speaker}: ${video.title}"
-                }
+            videoList{
+                videos = unwatchedVideos
             }
             h3 {
                 +"Videos watched"
             }
-            for (video in watchedVideos) {
-                p {
-                    +"${video.speaker}: ${video.title}"
-                }
+            videoList{
+                videos = watchedVideos
             }
         }
         styledDiv {
@@ -83,5 +50,12 @@ class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(prop
                 }
             }
         }
+    }
+}
+
+@ExperimentalJsExport
+fun RBuilder.app(handler: RProps.() -> Unit): ReactElement {
+    return child(App::class) {
+        this.attrs(handler)
     }
 }
