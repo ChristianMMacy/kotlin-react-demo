@@ -1,9 +1,11 @@
-import kotlinx.html.TITLE
+import kotlinx.css.*
 import react.RBuilder
 import react.RComponent
 import react.RProps
 import react.RState
 import react.dom.*
+import styled.css
+import styled.styledDiv
 
 external interface WelcomeProps : RProps {
     var name: String
@@ -66,7 +68,12 @@ class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(prop
                 }
             }
         }
-        div {
+        styledDiv {
+            css {
+                position = Position.absolute
+                top = 10.px
+                right = 10.px
+            }
             h3 {
                 +"John Doe: Building and breaking things"
             }
