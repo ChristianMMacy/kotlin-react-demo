@@ -20,7 +20,7 @@ data class KotlinVideo(
 external interface VideoListProps : RProps {
     var videos: List<Video>
     var selectedVideo: Video?
-    var onSelectVideo: (video: Video) -> Unit
+    var onSelectVideo: (Video) -> Unit
 }
 
 @ExperimentalJsExport
