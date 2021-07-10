@@ -1,13 +1,8 @@
-import kotlinx.html.InputType
-import kotlinx.html.js.onChangeFunction
-import org.w3c.dom.HTMLInputElement
 import react.RBuilder
 import react.RComponent
 import react.RProps
 import react.RState
-import styled.css
-import styled.styledDiv
-import styled.styledInput
+import react.dom.*
 
 external interface WelcomeProps : RProps {
     var name: String
@@ -24,23 +19,36 @@ class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(prop
     }
 
     override fun RBuilder.render() {
-        styledDiv {
-            css {
-                +WelcomeStyles.textContainer
-            }
-            +"Hello, ${state.name}"
+        h1 {
+            +"KotlinConf Explorer"
         }
-        styledInput {
-            css {
-                +WelcomeStyles.textInput
+        div {
+            h3 {
+                +"Videos to watch"
             }
-            attrs {
-                type = InputType.text
-                value = state.name
-                onChangeFunction = { event ->
-                    setState(
-                        WelcomeState(name = (event.target as HTMLInputElement).value)
-                    )
+            p {
+                +"John Doe: Building and breaking things"
+            }
+            p {
+                +"Jane Smith: The development process"
+            }
+            p {
+                +"Matt Miller: The Web 7.0"
+            }
+            h3 {
+                +"Videos watched"
+            }
+            p {
+                +"Tom Jerry: Mouseless development"
+            }
+        }
+        div {
+            h3 {
+                +"John Doe: Building and breaking things"
+            }
+            img {
+                attrs {
+                    src = "https://via.placeholder.com/640x320.png?text=Video+Player+Placeholder"
                 }
             }
         }
