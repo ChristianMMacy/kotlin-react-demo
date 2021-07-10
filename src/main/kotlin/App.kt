@@ -14,8 +14,21 @@ val watchedVideos = listOf(
     KotlinVideo(4, "Mouseless development", "Tom Jerry", "https://youtu.be/PsaFVLr8t4E")
 )
 
+external interface AppState : RState{
+    var selectedVideo: Video?
+}
+
 @ExperimentalJsExport
-class App : RComponent<RProps, RState>() {
+class App : RComponent<RProps, AppState>() {
+
+    /**
+     * Update the selected video
+     */
+    private val handleSelectVideo = { video: Video ->
+        setState {
+            selectedVideo = video
+        }
+    }
 
     override fun RBuilder.render() {
         h1 {
@@ -27,12 +40,16 @@ class App : RComponent<RProps, RState>() {
             }
             videoList{
                 videos = unwatchedVideos
+                selectedVideo = state.selectedVideo
+                onSelectVideo = handleSelectVideo
             }
             h3 {
                 +"Videos watched"
             }
             videoList{
                 videos = watchedVideos
+                selectedVideo = state.selectedVideo
+                onSelectVideo = handleSelectVideo
             }
         }
         styledDiv {
