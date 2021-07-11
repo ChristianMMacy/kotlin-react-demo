@@ -1,7 +1,7 @@
 @file:JsModule("react-youtube-lite")
 @file:JsNonModule
 
-package jsModules
+package npmModules
 
 import react.RClass
 import react.RProps

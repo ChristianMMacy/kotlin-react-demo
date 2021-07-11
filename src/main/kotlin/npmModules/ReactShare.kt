@@ -1,7 +1,7 @@
 @file:JsModule("react-share")
 @file:JsNonModule
 
-package jsModules
+package npmModules
 
 import react.RClass
 import react.RProps

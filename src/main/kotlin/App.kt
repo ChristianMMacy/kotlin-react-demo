@@ -1,5 +1,6 @@
 import kotlinx.browser.window
 import kotlinx.coroutines.*
+import kotlinx.css.h3
 import react.*
 import react.dom.*
 
@@ -30,91 +31,76 @@ suspend fun fetchVideos(): List<Video> = coroutineScope {
     }.awaitAll()
 }
 
-external interface AppState : RState {
-    var selectedVideo: Video?
-    var unWatchedVideos: List<Video>
-    var watchedVideos: List<Video>
-}
-
 @ExperimentalJsExport
-class App : RComponent<RProps, AppState>() {
+val app = functionalComponent<RProps> { _ ->
+    val (selectedVideo, setSelectedVideo) = useState<Video?>(null)
+    val (unWatchedVideos, setUnWatchedVideos) = useState<List<Video>>(listOf())
+    val (watchedVideos, setWatchedVideos) = useState<List<Video>>(listOf())
 
-    /**
-     * Update the selected video
-     */
-    private val handleSelectVideo = { video: Video ->
-        setState {
-            selectedVideo = video
+    // Once, when the component is first loaded, fetch the list of videos
+    // The useEffect hook changes when any of the items in the dependency list (only parameter) change
+    // Passing no parameter causes useEffect to be executed on every render--this means infinite loops if state is changing
+    // Passing an emptyList() ensures that useEffect is only called once, on first render
+    // If there was a possibility that "setUnWatchedVideos" could change, then it could be passed as a parameter like `listOf(setUnWatchedVideos)`
+    useEffect(emptyList()) {
+        val mainScope = MainScope()
+        mainScope.launch {
+            val videos = fetchVideos()
+            setUnWatchedVideos(videos)
         }
     }
 
     /**
      * Handle marking a video as watched or unwatched
      */
-    private val handleWatchVideo = { video: Video ->
-        setState {
-            if(video in unWatchedVideos) {
-                setState {
-                    unWatchedVideos = unWatchedVideos - video
-                    watchedVideos = watchedVideos + video
-                }
-            } else {
-                setState {
-                    watchedVideos = watchedVideos - video
-                    unWatchedVideos = unWatchedVideos + video
-                }
-            }
+    val handleWatchVideo = { video: Video ->
+        if (video in unWatchedVideos) {
+            setUnWatchedVideos(unWatchedVideos - video)
+            setWatchedVideos(watchedVideos + video)
+        } else {
+            setWatchedVideos(watchedVideos - video)
+            setUnWatchedVideos(unWatchedVideos + video)
         }
     }
 
-    override fun AppState.init() {
-        unWatchedVideos = listOf()
-        watchedVideos = listOf()
-
-        val mainScope = MainScope()
-        mainScope.launch {
-            val videos = fetchVideos()
-            setState {
-                unWatchedVideos = videos
-            }
+    // BEGIN VIEW
+    h1 {
+        +"KotlinConf Explorer"
+    }
+    div {
+        h3 {
+            +"Videos to watch"
+        }
+        videoList {
+            videos = unWatchedVideos
+            selected = selectedVideo
+            onSelectVideo = setSelectedVideo
+        }
+        h3 {
+            +"Videos watched"
+        }
+        videoList {
+            videos = watchedVideos
+            selected = selectedVideo
+            onSelectVideo = setSelectedVideo
         }
     }
-
-    override fun RBuilder.render() {
-        h1 {
-            +"KotlinConf Explorer"
-        }
-        div {
-            h3 {
-                +"Videos to watch"
-            }
-            videoList {
-                videos = state.unWatchedVideos
-                selectedVideo = state.selectedVideo
-                onSelectVideo = handleSelectVideo
-            }
-            h3 {
-                +"Videos watched"
-            }
-            videoList {
-                videos = state.watchedVideos
-                selectedVideo = state.selectedVideo
-                onSelectVideo = handleSelectVideo
-            }
-        }
-        state.selectedVideo?.let { selectedVideo ->
-            videoPlayer {
-                video = selectedVideo
-                onWatchVideo = handleWatchVideo
-                isWatched = state.watchedVideos.contains(selectedVideo)
-            }
+    selectedVideo?.let { sVideo ->
+        videoPlayer {
+            video = sVideo
+            onWatchVideo = handleWatchVideo
+            isWatched = watchedVideos.contains(sVideo)
         }
     }
 }
 
+/**
+ * Add a wrapper for the component so that invoking it is simpler and cleaner
+ * This removes the `child(<component>)` and `attrs` block boilerplate
+ */
 @ExperimentalJsExport
-fun RBuilder.app(handler: RProps.() -> Unit): ReactElement {
-    return child(App::class) {
-        this.attrs(handler)
+fun RBuilder.app(handler: RProps.() -> Unit) = child(app) {
+    attrs {
+        handler()
     }
 }
