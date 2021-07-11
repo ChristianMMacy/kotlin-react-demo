@@ -1,8 +1,8 @@
+import jsModules.*
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import react.*
 import react.dom.h3
-import react.dom.img
 import styled.css
 import styled.styledButton
 import styled.styledDiv
@@ -37,9 +37,29 @@ class VideoPlayer : RComponent<VideoPlayerProps, RState>() {
                 }
                 +"Mark as ${if(props.isWatched) "un" else ""}watched."
             }
-            img {
+            styledDiv {
+                css {
+                    display = Display.flex
+                    marginBottom = 10.px
+                }
+                emailShareButton {
+                    attrs.url = props.video.videoUrl
+                    emailIcon {
+                        attrs.size = 32
+                        attrs.round = true
+                    }
+                }
+                telegramShareButton {
+                    attrs.url = props.video.videoUrl
+                    telegramIcon {
+                        attrs.size = 32
+                        attrs.round = true
+                    }
+                }
+            }
+            reactPlayer {
                 attrs {
-                    src = "https://via.placeholder.com/640x320.png?text=Video+Player+Placeholder"
+                    url = props.video.videoUrl
                 }
             }
         }
