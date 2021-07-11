@@ -1,6 +1,34 @@
-import kotlinx.css.*
+import kotlinx.browser.window
+import kotlinx.coroutines.*
 import react.*
 import react.dom.*
+
+/**
+ * Get a single video's descriptor from the API
+ * @param id The ID of the video descriptor to fetch
+ * @return The fetched video descriptor
+ */
+suspend fun fetchVideo(id: Int): Video {
+    val url = "https://my-json-server.typicode.com/kotlin-hands-on/kotlinconf-json/videos/$id"
+    val response = window
+        .fetch(url)
+        .await()
+        .json()
+        .await()
+    return response as Video
+}
+
+/**
+ * Fetches a list of video descriptors
+ * @return A list of video descriptors
+ */
+suspend fun fetchVideos(): List<Video> = coroutineScope {
+    (1..25).map { id ->
+        async {
+            fetchVideo(id)
+        }
+    }.awaitAll()
+}
 
 external interface AppState : RState {
     var selectedVideo: Video?
@@ -40,15 +68,16 @@ class App : RComponent<RProps, AppState>() {
     }
 
     override fun AppState.init() {
-        unWatchedVideos = listOf(
-            KotlinVideo(1, "Building and breaking things", "John Doe", "https://youtu.be/PsaFVLr8t4E"),
-            KotlinVideo(2, "The development process", "Jane Smith", "https://youtu.be/PsaFVLr8t4E"),
-            KotlinVideo(3, "The Web 7.0", "Matt Miller", "https://youtu.be/PsaFVLr8t4E")
-        )
+        unWatchedVideos = listOf()
+        watchedVideos = listOf()
 
-        watchedVideos = listOf(
-            KotlinVideo(4, "Mouseless development", "Tom Jerry", "https://youtu.be/PsaFVLr8t4E")
-        )
+        val mainScope = MainScope()
+        mainScope.launch {
+            val videos = fetchVideos()
+            setState {
+                unWatchedVideos = videos
+            }
+        }
     }
 
     override fun RBuilder.render() {
